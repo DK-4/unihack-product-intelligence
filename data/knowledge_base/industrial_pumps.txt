@@ -1,0 +1,13 @@
+Centrifugal pumps are widely used in Water Treatment plants to move
+process water and effluent. They are also common in Industrial
+Processing lines for circulating fluids, in Chemical Dosing systems,
+and in HVAC circulation loops. Stainless steel centrifugal pumps are
+favored in food & beverage and pharmaceutical settings due to
+corrosion resistance and ease of cleaning. Typical selection criteria
+include flow rate, head/pressure, NPSH, and material compatibility
+with the pumped fluid.
+
+Motors used to drive centrifugal pumps are commonly rated in kW and
+are selected with a service factor margin above the pump's hydraulic
+power demand. Maximum working pressure is a key safety spec and
+should never be exceeded during operation.

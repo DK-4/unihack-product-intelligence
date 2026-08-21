@@ -1,0 +1,17 @@
+.env
+venv/
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+unihack.db
+data/chroma_store/
+data/sample_products/*
+!data/sample_products/.gitkeep
+.DS_Store
+*.egg-info/
+build/
+dist/
+.agents/
+.claude/
