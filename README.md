@@ -190,10 +190,25 @@ Optional: X200_datasheet.pdf, X200_product.jpg
 ```
 
 ## 11. Screenshots
+## 11. Screenshots
 
-_Add screenshots of the Streamlit dashboard here after running the app
-(input form, agent status, specifications table with evidence panel,
-validation summary, export)._ 
+**Product input form**
+![Input form](docs/screenshots/01_input_form.png)
+
+**4-agent pipeline execution**
+![Agent status](docs/screenshots/02_agent_status.png)
+
+**Structured specifications with confidence, status, source, and page**
+![Specifications table](docs/screenshots/03_specifications_table.png)
+
+**Evidence inspector — full traceability for any attribute**
+![Evidence inspector](docs/screenshots/04_evidence_inspector.png)
+
+**AI-enriched applications and description (RAG + LLM)**
+![Enrichment](docs/screenshots/05_enrichment.png)
+
+**Trust score and validation summary**
+![Validation](docs/screenshots/06_validation_trust.png)
 
 ## 12. Scalability
 
