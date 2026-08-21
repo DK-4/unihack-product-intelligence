@@ -14,9 +14,9 @@ import os
 import sys
 import tempfile
 
-import json
 import pandas as pd
 import streamlit as st
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # Bridge Streamlit Cloud's secrets manager into normal environment variables
@@ -26,10 +26,11 @@ try:
 except Exception:
     pass
 
+# THIS MUST BE THE FIRST st.* CALL IN THE WHOLE SCRIPT
+st.set_page_config(page_title="UniHack Product Intelligence", layout="wide")
+
 from models.state import ProductIdentity, ProductState  # noqa: E402
 from orchestrator import run_pipeline  # noqa: E402
-
-st.set_page_config(page_title="UniHack Product Intelligence", layout="wide")
 
 # --- TEMPORARY DEBUG PANEL — remove after diagnosing ---
 with st.expander("🐛 Debug: environment check"):
