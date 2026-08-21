@@ -17,8 +17,16 @@ import tempfile
 import json
 import pandas as pd
 import streamlit as st
-
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+# Bridge Streamlit Cloud's secrets manager into normal environment variables,
+# so services/llm_service.py (which uses os.getenv) works the same way
+# whether running locally (.env file) or deployed (st.secrets).
+try:
+    for key, value in st.secrets.items():
+        os.environ.setdefault(key, str(value))
+except Exception:
+    pass  # no secrets.toml locally -- that's expected, .env handles it instead
 
 from models.state import ProductIdentity, ProductState  # noqa: E402
 from orchestrator import run_pipeline  # noqa: E402
