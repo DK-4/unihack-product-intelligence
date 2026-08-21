@@ -31,6 +31,18 @@ except Exception:
 from models.state import ProductIdentity, ProductState  # noqa: E402
 from orchestrator import run_pipeline  # noqa: E402
 
+# --- TEMPORARY DEBUG PANEL — remove after diagnosing ---
+with st.expander("🐛 Debug: environment check"):
+    st.write("MODEL_PROVIDER:", os.getenv("MODEL_PROVIDER"))
+    key = os.getenv("GEMINI_API_KEY")
+    st.write("GEMINI_API_KEY present:", bool(key))
+    st.write("GEMINI_API_KEY starts with:", key[:8] if key else None)
+    try:
+        st.write("st.secrets keys:", list(st.secrets.keys()))
+    except Exception as e:
+        st.write("st.secrets error:", str(e))
+# --- END DEBUG ---
+
 st.set_page_config(page_title="UniHack Product Intelligence", layout="wide")
 
 st.title("🏭 UniHack — AI Product Intelligence for Industrial Commerce")
