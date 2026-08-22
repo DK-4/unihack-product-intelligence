@@ -20,20 +20,21 @@ import streamlit as st
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-# Bridge Streamlit Cloud's secrets manager into normal environment variables
+# Bridge Streamlit Cloud's secrets manager into normal environment variables,
+# so services/llm_service.py (which uses os.getenv) works the same way
+# whether running locally (.env file) or deployed (st.secrets).
 try:
     for key, value in st.secrets.items():
         os.environ.setdefault(key, str(value))
 except Exception:
-    pass
+    pass  # no secrets.toml locally -- that's expected, .env handles it instead
 
 # THIS MUST BE THE FIRST st.* CALL IN THE WHOLE SCRIPT
 st.set_page_config(page_title="UniHack Product Intelligence", layout="wide")
 
 from models.state import ProductIdentity, ProductState  # noqa: E402
 from orchestrator import run_pipeline  # noqa: E402
-
-
+from services.export_service import build_expected_output_row, to_csv_bytes, to_xlsx_bytes  # noqa: E402
 
 st.title("🏭 UniHack — AI Product Intelligence for Industrial Commerce")
 st.caption("Limited input → Discovery → Standardization → Enrichment → Trust/Validation → Traceable record")
@@ -50,6 +51,10 @@ with st.sidebar:
 
 if "state" not in st.session_state:
     st.session_state.state = None
+if "pdf_display_name" not in st.session_state:
+    st.session_state.pdf_display_name = None
+if "image_display_name" not in st.session_state:
+    st.session_state.image_display_name = None
 
 if generate:
     if not part_number or not brand or not description:
@@ -57,17 +62,23 @@ if generate:
     else:
         pdf_path = None
         image_path = None
+        pdf_display_name = None
+        image_display_name = None
+
         if pdf_file is not None:
             tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".pdf")
             tmp.write(pdf_file.read())
             tmp.close()
             pdf_path = tmp.name
+            pdf_display_name = pdf_file.name
+
         if image_file is not None:
             suffix = os.path.splitext(image_file.name)[1] or ".jpg"
             tmp = tempfile.NamedTemporaryFile(delete=False, suffix=suffix)
             tmp.write(image_file.read())
             tmp.close()
             image_path = tmp.name
+            image_display_name = image_file.name
 
         state = ProductState(
             product_identity=ProductIdentity(part_number=part_number, brand=brand, description=description),
@@ -84,6 +95,8 @@ if generate:
                 status.write(f"✓ **{entry.agent}** — {entry.action} ({entry.detail or ''})")
             status.update(label="Pipeline completed", state="complete")
             st.session_state.state = final_state
+            st.session_state.pdf_display_name = pdf_display_name
+            st.session_state.image_display_name = image_display_name
         except Exception as e:  # noqa: BLE001
             status.update(label="Pipeline failed", state="error")
             st.exception(e)
@@ -162,11 +175,37 @@ if state is not None:
                 cols[3].caption(f"confidence {attr.confidence*100:.0f}%")
 
     st.markdown("### 📤 Export")
-    st.download_button(
-        "Download JSON",
-       data=json.dumps(record, indent=2, default=str),
-        file_name=f"{record['product_name'] or 'product'}.json".replace(" ", "_"),
-        mime="application/json",
+
+    col_json, col_xlsx, col_csv = st.columns(3)
+
+    with col_json:
+        st.download_button(
+            "Download JSON",
+            data=json.dumps(record, indent=2, default=str),
+            file_name=f"{record['product_name'] or 'product'}.json".replace(" ", "_"),
+            mime="application/json",
+        )
+
+    expected_row = build_expected_output_row(
+        record,
+        pdf_path=st.session_state.get("pdf_display_name") or state.pdf_path,
+        image_path=st.session_state.get("image_display_name") or state.image_path,
     )
+
+    with col_xlsx:
+        st.download_button(
+            "Download XLSX (Expected Output)",
+            data=to_xlsx_bytes(expected_row),
+            file_name=f"{record['product_name'] or 'product'}_expected_output.xlsx".replace(" ", "_"),
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+
+    with col_csv:
+        st.download_button(
+            "Download CSV (Expected Output)",
+            data=to_csv_bytes(expected_row),
+            file_name=f"{record['product_name'] or 'product'}_expected_output.csv".replace(" ", "_"),
+            mime="text/csv",
+        )
 else:
     st.info("Fill in the product details in the sidebar and click **Generate Product Intelligence** to begin.")
